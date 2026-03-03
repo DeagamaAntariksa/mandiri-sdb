@@ -92,16 +92,26 @@ const AdminLayout = ({ theme, toggleTheme }: AdminLayoutProps) => {
 
             {/* Sidebar */}
             <aside className={`
-                fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 transform
-                ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0'}
+                fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 transform overflow-hidden
+                ${isSidebarOpen
+                    ? 'w-72 translate-x-0'
+                    : '-translate-x-full lg:translate-x-0 w-72 lg:w-20'}
             `}>
-                <div className={`h-full flex flex-col p-6 ${!isSidebarOpen && 'lg:items-center lg:px-0'}`}>
-                    <div className={`flex items-center gap-3 mb-10 px-2 transition-all ${!isSidebarOpen && 'lg:justify-center'}`}>
+                <div className={`h-full flex flex-col p-8 ${!isSidebarOpen ? 'lg:items-center lg:px-0' : ''}`}>
+                    <div className={`flex items-center justify-between mb-12 transition-all ${!isSidebarOpen ? 'lg:justify-center' : ''}`}>
                         <img
                             src="/mandiri-logo.png"
                             alt="Bank Mandiri"
-                            className={`h-8 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''} ${!isSidebarOpen && 'lg:w-8 lg:h-8'}`}
+                            className={`h-8 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''} ${!isSidebarOpen ? 'lg:w-8 lg:h-8' : ''}`}
                         />
+                        {isSidebarOpen && (
+                            <button
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="lg:hidden p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
 
                     <nav className="flex-grow space-y-2">
@@ -109,6 +119,7 @@ const AdminLayout = ({ theme, toggleTheme }: AdminLayoutProps) => {
                             <Link
                                 key={item.path}
                                 to={item.path}
+                                onClick={() => window.innerWidth < 1024 && setIsSidebarOpen(false)}
                                 title={!isSidebarOpen ? item.label : ''}
                                 className={`
                                     flex items-center gap-4 px-4 py-3.5 rounded-xl font-bold transition-all group

@@ -90,31 +90,34 @@ const LoginPage = ({ theme, toggleTheme }: LoginPageProps) => {
     return (
         <div className="min-h-screen flex flex-col md:flex-row bg-white dark:bg-gray-950 transition-colors duration-500">
             {/* Theme & Language Toggles */}
-            <div className="fixed top-6 right-6 z-50 flex items-center gap-3">
+            {/* Theme & Language Toggles */}
+            <div className="fixed bottom-6 right-6 md:top-6 md:right-6 md:bottom-auto z-50 flex items-center gap-2 md:gap-3 px-2 py-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-full border border-white/20 shadow-2xl">
                 <button
                     onClick={toggleTheme}
-                    className="p-2.5 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-lg"
+                    className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all shadow-sm"
                 >
-                    {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                    {theme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
                 </button>
+                <div className="w-px h-4 bg-white/20 mx-1" />
                 <button
                     onClick={toggleLanguage}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-lg"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-400 text-[9px] font-black uppercase tracking-widest hover:bg-white dark:hover:bg-gray-700 transition-all shadow-sm"
                 >
-                    <Globe className="w-3.5 h-3.5" />
+                    <Globe className="w-3 h-3" />
                     {i18n.language.toUpperCase()}
                 </button>
             </div>
 
             {/* ── LEFT PANEL ── */}
-            <div className="relative md:flex-1 h-48 md:h-auto overflow-hidden">
+            <div className="relative md:flex-1 h-64 md:h-auto overflow-hidden">
                 <img
                     src="/bg-login.jpg"
                     alt="Bank Mandiri Safe Deposit Box"
                     className="absolute inset-0 w-full h-full object-cover object-center"
                 />
-                <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-b md:bg-gradient-to-r from-black/80 via-black/50 to-black/20' : 'bg-gradient-to-b md:bg-gradient-to-r from-blue-900/40 via-blue-900/20 to-transparent'}`} />
+                <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-b md:bg-gradient-to-r from-black/80 via-black/50 to-black/20' : 'bg-gradient-to-b md:bg-gradient-to-r from-blue-900/60 via-blue-900/40 to-transparent'}`} />
 
+                {/* Desktop Version */}
                 <div className="relative hidden md:flex flex-col justify-between h-full p-10 z-10">
                     <div className="flex items-center gap-3">
                         <img src="/mandiri-logo.png" alt="Bank Mandiri" className={`h-9 w-auto ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
@@ -134,11 +137,14 @@ const LoginPage = ({ theme, toggleTheme }: LoginPageProps) => {
                     </div>
                 </div>
 
-                <div className="relative md:hidden flex items-center justify-center h-full z-10 gap-3">
-                    <img src="/mandiri-logo.png" alt="Bank Mandiri" className={`h-10 w-auto ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
-                    <div className="border-l border-white/40 pl-3">
-                        <p className="text-white text-sm font-black">Safe Deposit Box</p>
-                        <p className="text-white/70 text-xs">{t('login.branch_name')}</p>
+                {/* Mobile Version - More structured */}
+                <div className="relative md:hidden flex flex-col items-center justify-center h-full z-10 p-6 text-center">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl shadow-2xl">
+                        <img src="/mandiri-logo.png" alt="Bank Mandiri" className={`h-8 w-auto mx-auto mb-4 ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
+                        <div className="space-y-1">
+                            <h2 className="text-xl font-black text-white leading-tight drop-shadow-sm">Safe Deposit Box</h2>
+                            <p className="text-yellow-400 text-sm font-bold uppercase tracking-widest">{t('login.branch_name')}</p>
+                        </div>
                     </div>
                 </div>
             </div>
