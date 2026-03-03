@@ -117,12 +117,14 @@ app.use((req, res, next) => {
 
 // Root route
 app.get('/', (req, res) => {
+    const isProd = process.env.NODE_ENV === 'production';
     res.send(`
         <div style="font-family: sans-serif; padding: 50px; text-align: center;">
-            <h1 style="color: #2563eb;">🚀 Backend Express (Local MySQL) Active!</h1>
-            <p>Server running on port 5001.</p>
-            <p>Database: localhost (XAMPP)</p>
-            <p>Status: <span style="color: green; font-weight: bold;">Connected ✅</span></p>
+            <h1 style="color: #2563eb;">🚀 Backend Express ${isProd ? '(Production)' : '(Local)'} Active!</h1>
+            <p>Server running on port ${process.env.PORT || 5001}.</p>
+            <p>Database Status: <span style="color: green; font-weight: bold;">Connected ✅</span></p>
+            <hr style="margin: 20px 0; border: 1px solid #eee;">
+            <p style="color: #666;">Application is ready for safe deposit box management.</p>
         </div>
     `);
 });
@@ -322,9 +324,9 @@ app.get('/api/admin/applications/:id', async (req, res) => {
                 name: appData.full_name,
                 paymentStatus: appData.payment_status,
                 size: appData.box_size,
-                ktpImage: appData.ktp_path ? `http://localhost:5001/${appData.ktp_path}` : null,
-                passbookImage: appData.passbook_path ? `http://localhost:5001/${appData.passbook_path}` : null,
-                signatureImage: appData.signature_path ? `http://localhost:5001/${appData.signature_path}` : null,
+                ktpImage: appData.ktp_path ? `${process.env.BASE_URL}/${appData.ktp_path}` : null,
+                passbookImage: appData.passbook_path ? `${process.env.BASE_URL}/${appData.passbook_path}` : null,
+                signatureImage: appData.signature_path ? `${process.env.BASE_URL}/${appData.signature_path}` : null,
                 startDate: fmt(appData.start_date),
                 endDate: fmt(appData.jatuh_temponext),
                 paymentDueDate: appData.jatuh_temponext ? fmt(appData.jatuh_temponext) : null,
