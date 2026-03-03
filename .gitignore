@@ -10,3 +10,5 @@ api-backend/uploads/
 # OS
 .DS_Store
 Thumbs.db
+.vercel
+.env*.local

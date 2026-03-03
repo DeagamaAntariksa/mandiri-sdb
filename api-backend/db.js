@@ -1,22 +1,17 @@
-import { createPool } from '@vercel/postgres';
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Safe Vercel Postgres Pool creation
-let pool;
-if (process.env.POSTGRES_URL) {
-  pool = createPool({
-    connectionString: process.env.POSTGRES_URL,
-  });
-} else {
-  // Dummy pool that throws helpful errors instead of crashing the whole app
-  pool = {
-    query: () => {
-      throw new Error('Database not connected. Please click "Connect" in Vercel Storage dashboard.');
-    }
-  };
-  console.warn('POSTGRES_URL is missing. Database functionality will be unavailable.');
-}
+// MySQL connection configuration
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'mandiri_sdb',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 export default pool;
