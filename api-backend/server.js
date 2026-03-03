@@ -19,6 +19,7 @@ if (!fs.existsSync(uploadDir)) {
 // Initialize Database Tables
 const initDB = async () => {
     try {
+        // Initialize Box Inventory Table
         await pool.query(`
             CREATE TABLE IF NOT EXISTS box_inventory (
                 id SERIAL PRIMARY KEY,
@@ -27,7 +28,36 @@ const initDB = async () => {
             )
         `);
 
-        // Check if columns exist in applications table (Postgres doesn't have ADD COLUMN IF NOT EXISTS directly in older versions, but Vercel Postgres does)
+        // Initialize Applications Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS applications (
+                id SERIAL PRIMARY KEY,
+                tracking_code VARCHAR(20) UNIQUE,
+                full_name VARCHAR(255),
+                nik VARCHAR(20),
+                phone VARCHAR(20),
+                email VARCHAR(255),
+                address TEXT,
+                account_number VARCHAR(50),
+                account_type VARCHAR(50),
+                credit_card_type VARCHAR(50),
+                box_size VARCHAR(10),
+                box_room VARCHAR(10) DEFAULT '1',
+                box_number INT,
+                status VARCHAR(20) DEFAULT 'pending',
+                payment_status VARCHAR(20) DEFAULT 'unpaid',
+                rejection_reason TEXT,
+                ktp_path TEXT,
+                passbook_path TEXT,
+                signature_path TEXT,
+                price DECIMAL(15, 2),
+                start_date DATE,
+                jatuh_temponext DATE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Check for migration columns (if table already exists but needs updates)
         await pool.query(`
             DO $$ 
             BEGIN 
@@ -35,7 +65,16 @@ const initDB = async () => {
                     ALTER TABLE applications ADD COLUMN box_number INT;
                 END IF;
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='box_room') THEN
-                    ALTER TABLE applications ADD COLUMN box_room VARCHAR(10);
+                    ALTER TABLE applications ADD COLUMN box_room VARCHAR(10) DEFAULT '1';
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='price') THEN
+                    ALTER TABLE applications ADD COLUMN price DECIMAL(15, 2);
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='start_date') THEN
+                    ALTER TABLE applications ADD COLUMN start_date DATE;
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='jatuh_temponext') THEN
+                    ALTER TABLE applications ADD COLUMN jatuh_temponext DATE;
                 END IF;
             END $$;
         `);
