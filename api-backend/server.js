@@ -115,7 +115,7 @@ app.use((req, res, next) => {
         return res.status(500).json({
             error: 'MISSING_DATABASE_CONNECTION',
             message: 'Silakan hubungkan Vercel Postgres ke project ini lewat dashboard.',
-            instructions: 'Buka https://vercel.com/deagamaantariksas-projects/mandiri-sdb-api-backend/storage lalu klik tombol "Connect"'
+            instructions: 'Buka https://vercel.com/deagamaantariksas-projects/api-backend/storage lalu klik tombol "Connect"'
         });
     }
     next();
@@ -135,7 +135,7 @@ app.get('/', (req, res) => {
                     <h3 style="color: #c00; margin-top: 0;">⚠️ Database Belum Terhubung</h3>
                     <p>Waduh Pak, tinggal satu klik lagi nih biar beres!</p>
                     <p style="margin-bottom: 30px;">Silakan klik link di bawah ini lalu tekan tombol biru <b>"Connect"</b>:</p>
-                    <a href="https://vercel.com/deagamaantariksas-projects/mandiri-sdb-api-backend/storage" target="_blank" style="padding: 15px 30px; background: #0070f3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">HUBUNGKAN DATABASE SEKARANG</a>
+                    <a href="https://vercel.com/deagamaantariksas-projects/api-backend/storage" target="_blank" style="padding: 15px 30px; background: #0070f3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">HUBUNGKAN DATABASE SEKARANG</a>
                 </div>
             ` : '<p style="color: #666;">Backend siap melayani request!</p>'}
         </div>
