@@ -10,14 +10,22 @@ import { sendTrackingCodeEmail, sendPaymentReminderEmail, sendApprovalEmail } fr
 
 dotenv.config();
 
-// Ensure uploads directory exists
-const uploadDir = 'uploads';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+// Ensure uploads directory exists (Safe for Serverless)
+const uploadDir = path.join('/tmp', 'uploads');
+try {
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+} catch (e) {
+    console.log('Upload dir creation skipped (read-only FS)');
 }
 
 // Initialize Database Tables
 const initDB = async () => {
+    if (!process.env.POSTGRES_URL) {
+        console.error('CRITICAL: POSTGRES_URL is missing! Database initialization skipped.');
+        return;
+    }
     try {
         // Initialize Box Inventory Table
         await pool.query(`

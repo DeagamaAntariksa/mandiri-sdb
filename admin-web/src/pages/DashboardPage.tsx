@@ -126,7 +126,6 @@ const StatCard = ({ icon, label, value, subValue, color }: any) => {
 };
 
 const ProgressRow = ({ label, value, total, color }: any) => {
-    const { t } = useTranslation();
     return (
         <div className="space-y-3">
             <div className="flex justify-between text-sm font-bold">
