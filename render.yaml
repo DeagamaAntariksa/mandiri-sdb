@@ -1,0 +1,63 @@
+services:
+  # ==========================================
+  # BACKEND: Node.js / Express API
+  # ==========================================
+  - type: web
+    name: mandiri-sdb-backend
+    runtime: node
+    rootDir: api-backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: NODE_ENV
+        value: production
+
+  # ==========================================
+  # FRONTEND ADMIN: React/Vite Static Site
+  # ==========================================
+  - type: static
+    name: mandiri-sdb-admin
+    rootDir: admin-web
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ==========================================
+  # FRONTEND CUSTOMER: React/Vite Static Site
+  # ==========================================
+  - type: static
+    name: mandiri-sdb-customer
+    rootDir: customer-web
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
