@@ -1,0 +1,15 @@
+{
+    "name": "mandiri-sdb-stack",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "api-backend",
+        "customer-web",
+        "admin-web"
+    ],
+    "scripts": {
+        "dev:backend": "npm run dev --workspace=api-backend",
+        "dev:customer": "npm run dev --workspace=customer-web",
+        "dev:admin": "npm run dev --workspace=admin-web"
+    }
+}

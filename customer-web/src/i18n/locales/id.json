@@ -1,0 +1,193 @@
+{
+    "common": {
+        "app_name": "Sistem Manajemen Safe Deposit Box",
+        "loading": "Memuat...",
+        "error": "Terjadi kesalahan",
+        "submit": "Kirim",
+        "back": "Kembali",
+        "next": "Lanjut",
+        "cancel": "Batal",
+        "confirm": "Konfirmasi",
+        "save": "Simpan",
+        "close": "Tutup",
+        "detail": "Detail"
+    },
+    "landing": {
+        "title": "Simpan Barang Berharga Anda dengan Aman",
+        "description": "Layanan Safe Deposit Box modern, aman, dan terpercaya untuk semua generasi.",
+        "cta": "Ajukan Sekarang",
+        "features": {
+            "security_title": "Keamanan Maksimal",
+            "security_desc": "Sistem berlapis dengan akses terbatas dan pengawasan 24/7.",
+            "access_title": "Akses Fleksibel",
+            "access_desc": "Akses barang berharga Anda kapan saja selama jam operasional bank.",
+            "ease_title": "Proses Mudah",
+            "ease_desc": "Pendaftaran digital yang cepat dan praktis untuk semua umur."
+        }
+    },
+    "customer_form": {
+        "step_1": "Informasi Pribadi",
+        "step_2": "Ukuran Box",
+        "step_3": "Posisi Box",
+        "step_4": "Unggah Dokumen",
+        "step_5": "Tanda Tangan Digital",
+        "step_6": "Tinjau & Kirim",
+        "full_name": "Nama Lengkap",
+        "nik": "NIK",
+        "email": "Email",
+        "phone": "Nomor Telepon",
+        "address": "Alamat",
+        "account_number": "Nomor Rekening Mandiri",
+        "account_type": "Jenis Rekening",
+        "credit_card_type": "Jenis Kartu Kredit",
+        "ktp_photo": "Foto KTP",
+        "passbook_photo": "Foto Buku Tabungan",
+        "capture_photo": "Ambil Foto",
+        "retake_photo": "Ambil Ulang",
+        "gallery": "Pilih dari Galeri",
+        "confirmation": "Saya mengkonfirmasi bahwa data yang dimasukkan adalah benar.",
+        "placeholders": {
+            "full_name": "Contoh: John Doe",
+            "nik": "16 digit NIK",
+            "phone": "0812xxxx",
+            "email": "example@mail.com",
+            "address": "Alamat lengkap sesuai KTP",
+            "account_number": "13 digit nomor rekening"
+        },
+        "options": {
+            "select_account": "Pilih Jenis Rekening",
+            "select_credit_card": "Pilih Jenis Kartu",
+            "account_types": {
+                "now": "Tabungan Now",
+                "payroll": "Tabungan Payroll",
+                "rencana": "Tabungan Rencana",
+                "prioritas": "Mandiri Prioritas",
+                "other": "Lainnya"
+            },
+            "cc_types": {
+                "signature": "Mandiri Signature",
+                "precious": "Mandiri Precious",
+                "skyz": "Mandiri Skyz",
+                "everyday": "Mandiri Everyday",
+                "none": "Bukan Pengguna CC",
+                "other": "Lainnya"
+            }
+        },
+        "validation": {
+            "name_min": "Nama lengkap minimal 3 karakter",
+            "nik_len": "NIK harus 16 digit",
+            "phone_min": "Nomor handphone tidak valid",
+            "email_invalid": "Email tidak valid",
+            "address_min": "Alamat minimal 10 karakter",
+            "account_mandiri_len": "Nomor rekening Mandiri harus 13 digit",
+            "select_account": "Pilih jenis rekening",
+            "select_credit_card": "Pilih jenis kartu kredit",
+            "select_box": "Pilih ukuran box",
+            "ktp_required": "Foto KTP wajib diunggah",
+            "passbook_required": "Foto Buku Tabungan wajib diunggah",
+            "signature_required": "Tanda tangan wajib dibuat & disimpan",
+            "agreed_required": "Anda harus menyetujui syarat & ketentuan"
+        }
+    },
+    "box_sizes": {
+        "title": "Pilih Ukuran Box",
+        "subtitle": "Pilih ukuran yang paling sesuai dengan kebutuhan Anda",
+        "type_label": "Tipe {{label}}",
+        "box_size_30_desc": "Ukuran Kecil - Cocok untuk dokumen dan perhiasan kecil.",
+        "box_size_40_desc": "Ukuran Sedang - Cocok untuk koleksi berharga dan dokumen penting.",
+        "box_size_50_desc": "Ukuran Besar - Cocok untuk barang berharga berukuran besar."
+    },
+    "status": {
+        "title": "Cek Status Pengajuan",
+        "subtitle": "Lacak perkembangan pengajuan Safe Deposit Box Anda",
+        "tracking_code": "Kode Pelacakan",
+        "search_placeholder": "CONTOH: SDB-A1B2C3D",
+        "check_button": "Cek Status",
+        "verify_method": "Metode Verifikasi",
+        "details_title": "Detail Pengajuan",
+        "not_found": "Pengajuan tidak ditemukan. Silakan periksa kembali kode pelacakan Anda.",
+        "pending": "Menunggu",
+        "active": "Aktif",
+        "rejected": "Ditolak",
+        "expired": "Kedaluwarsa",
+        "paid": "Dibayar",
+        "unpaid": "Belum Bayar",
+        "late": "Terlambat",
+        "payment_status": "Status Pembayaran",
+        "contract_status": "Status Kontrak",
+        "status_header": "Status Pengajuan",
+        "applicant_info": "Data Diri Pemohon",
+        "order_details": "Detail Pesanan",
+        "payment_none": "Belum ada",
+        "date_submitted": "Tanggal Pengajuan",
+        "date_start": "Tanggal Mulai Dipakai",
+        "date_end": "Tanggal Berakhir Dipakai",
+        "waiting_approval": "Menunggu persetujuan",
+        "description_pending": "Pengajuan Anda sedang dalam proses verifikasi oleh admin kami. Mohon bersabar.",
+        "description_active": "Pengajuan Anda telah disetujui. Silakan kunjungi cabang bank terdekat untuk aktivasi fisik.",
+        "description_rejected": "Mohon maaf, pengajuan Anda tidak dapat disetujui.",
+        "description_expired": "Masa penyewaan Safe Deposit Box Anda telah berakhir."
+    },
+    "success": {
+        "title": "Pengajuan Berhasil Dikirim!",
+        "subtitle": "Terima kasih telah mengajukan Safe Deposit Box. Silakan simpan kode pelacakan Anda di bawah ini.",
+        "tracking_code": "Kode Pelacakan Anda",
+        "save_code_hint": "Harap simpan kode ini untuk mengecek status pengajuan Anda nanti.",
+        "copy_toast": "Kode pelacakan berhasil disalin!",
+        "check_status_cta": "Cek Status Sekarang",
+        "back_home": "Kembali ke Beranda",
+        "next_steps_title": "Tahap Selanjutnya:",
+        "next_step_1": "Admin akan meninjau dokumen Anda dalam 1-3 hari kerja.",
+        "next_step_2": "Anda dapat mengecek status pengajuan kapan saja menggunakan kode pelacakan di atas.",
+        "next_step_3": "Kami akan mengirimkan notifikasi melalui email jika pengajuan Anda disetujui."
+    },
+    "apply": {
+        "title": "Pengajuan Baru",
+        "subtitle": "Lengkapi {{count}} langkah mudah untuk mengamankan aset Anda",
+        "next_step": "Lanjut ke Langkah Berikutnya",
+        "prev_step": "Sebelumnya",
+        "submit_application": "Kirim Pengajuan Sekarang",
+        "submitting": "Mengirim...",
+        "success_toast": "Pengajuan berhasil dikirim!",
+        "error_toast": "Gagal mengirim pengajuan.",
+        "review_subtitle": "Tinjau kembali data Anda sebelum mengirim pengajuan",
+        "upload": {
+            "subtitle": "Pastikan dokumen terlihat jelas dan tidak buram",
+            "success": "Berhasil Diunggah",
+            "change": "Ganti Foto"
+        },
+        "signature": {
+            "title": "Tanda Tangan Digital",
+            "subtitle": "Tanda tangani di dalam kotak di bawah menggunakan jari atau stylus Anda.",
+            "area": "Area Tanda Tangan",
+            "reset": "Ulangi",
+            "placeholder_main": "Tanda tangan di sini",
+            "placeholder_sub": "Gunakan jari atau mouse",
+            "save": "Simpan Tanda Tangan",
+            "saved": "Tanda Tangan Tersimpan",
+            "success_msg": "Tanda tangan berhasil disimpan. Lanjutkan ke langkah berikutnya.",
+            "tips_title": "Tips",
+            "tip_1": "Gunakan jari atau stylus untuk menandatangani",
+            "tip_2": "Pastikan tanda tangan sesuai dengan KTP Anda",
+            "tip_3": "Klik \"Ulangi\" jika ingin mengulang"
+        },
+        "validation": {
+            "select_room": "Silakan pilih ruangan",
+            "select_box_number": "Silakan pilih nomor box"
+        }
+    },
+    "footer": {
+        "branch": "Kantor Cabang Jakarta Pondok Indah Metro",
+        "description": "Layanan penitipan barang dan surat berharga yang dirancang khusus untuk kenyamanan dan keamanan Anda.",
+        "contact_info": "Kontak & Informasi",
+        "operational_hours": "Jam Operasional SDB",
+        "mon_fri": "Senin - Jumat",
+        "sat": "Sabtu",
+        "sun": "Minggu",
+        "closed": "Tutup",
+        "note": "*Mengikuti hari kerja Bank Indonesia & Libur Nasional",
+        "copyright": "PT Bank Mandiri (Persero) Tbk. Terdaftar dan diawasi oleh OJK.",
+        "maps_link": "Buka di Google Maps",
+        "address": "Jl. Metro Pondok Indah, RT.1/RW.16, Pd. Pinang, Kby. Lama, Kota Jakarta Selatan, DKI Jakarta 12310"
+    }
+}
