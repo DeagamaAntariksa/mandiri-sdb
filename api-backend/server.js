@@ -126,18 +126,41 @@ app.use(express.json());
 
 // Main status route
 app.get('/', (req, res) => {
+    const hasDB = !!process.env.POSTGRES_URL;
+    const hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+
     res.send(`
-        <div style="font-family: sans-serif; max-width: 600px; margin: 50px auto; text-align: center;">
-            <h1 style="color: #0070f3;">Mandiri SDB Backend is Live! 🚀</h1>
-            <p>Status: ${process.env.POSTGRES_URL ? '<span style="color: green;">✅ Connected</span>' : '<span style="color: red;">❌ Database Missing</span>'}</p>
-            ${!process.env.POSTGRES_URL ? `
-                <div style="background: #fee; padding: 30px; border: 1px solid #f99; border-radius: 12px; margin-top: 30px;">
-                    <h3 style="color: #c00; margin-top: 0;">⚠️ Database Belum Terhubung</h3>
-                    <p>Waduh Pak, tinggal satu klik lagi nih biar beres!</p>
-                    <p style="margin-bottom: 30px;">Silakan klik link di bawah ini lalu tekan tombol biru <b>"Connect"</b>:</p>
-                    <a href="https://vercel.com/deagamaantariksas-projects/api-backend/storage" target="_blank" style="padding: 15px 30px; background: #0070f3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">HUBUNGKAN DATABASE SEKARANG</a>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 50px auto; text-align: center; border: 1px solid #eee; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+            <h1 style="color: #0070f3; margin-bottom: 10px;">Mandiri SDB Backend is Live! 🚀</h1>
+            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <p>Database: ${hasDB ? '<span style="color: green; font-weight: bold;">✅ Terhubung</span>' : '<span style="color: red; font-weight: bold;">❌ Belum Terhubung</span>'}</p>
+                <p>Storage: ${hasBlob ? '<span style="color: green; font-weight: bold;">✅ Terhubung</span>' : '<span style="color: red; font-weight: bold;">❌ Belum Terhubung</span>'}</p>
+            </div>
+            
+            ${!hasDB || !hasBlob ? `
+                <div style="background: #fff5f5; padding: 30px; border: 1px solid #feb2b2; border-radius: 15px; margin-top: 30px;">
+                    <h2 style="color: #c53030; margin-top: 0;">⚠️ Sedikit Lagi Beres Pak!</h2>
+                    <p style="color: #4a5568;">Vercel perlu izin Bapak untuk menyambungkan Database ke kode ini.</p>
+                    
+                    <div style="text-align: left; background: white; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #edf2f7;">
+                        <p><b>Cara manualnya (Gampang):</b></p>
+                        <ol style="line-height: 1.6; color: #4a5568;">
+                            <li>Buka <b><a href="https://vercel.com/dashboard" target="_blank">Vercel Dashboard</a></b></li>
+                            <li>Pilih project bernama <b>api-backend</b></li>
+                            <li>Klik tab <b>Storage</b> di bagian atas</li>
+                            <li>Klik tombol biru <b>"Connect"</b> pada database Postgres & Blob</li>
+                        </ol>
+                    </div>
+
+                    <p style="margin-bottom: 25px;">Atau coba tombol di bawah ini (Jika tidak 404):</p>
+                    <a href="https://vercel.com/deagamaantariksas-projects/api-backend/storage" target="_blank" style="display: inline-block; padding: 15px 30px; background: #0070f3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; transition: transform 0.2s;">HUBUNGKAN SEKARANG</a>
                 </div>
-            ` : '<p style="color: #666;">Backend siap melayani request!</p>'}
+            ` : `
+                <div style="background: #f0fff4; padding: 30px; border: 1px solid #9ae6b4; border-radius: 15px; margin-top: 30px;">
+                    <h2 style="color: #2f855a; margin-top: 0;">✅ Sempurna!</h2>
+                    <p>Semua sistem sudah terhubung. Website Bapak siap digunakan.</p>
+                </div>
+            `}
         </div>
     `);
 });
