@@ -108,11 +108,39 @@ initDB();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
-const PORT = 5001; // Hardcoded to avoid conflicts with 5000
+
+// Middleware to check database connection (Safe for Serverless)
+app.use((req, res, next) => {
+    if (!process.env.POSTGRES_URL && req.path.startsWith('/api')) {
+        return res.status(500).json({
+            error: 'MISSING_DATABASE_CONNECTION',
+            message: 'Silakan hubungkan Vercel Postgres ke project ini lewat dashboard.',
+            instructions: 'Buka https://vercel.com/deagamaantariksas-projects/mandiri-sdb-api-backend/storage lalu klik tombol "Connect"'
+        });
+    }
+    next();
+});
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+
+// Main status route
+app.get('/', (req, res) => {
+    res.send(`
+        <div style="font-family: sans-serif; max-width: 600px; margin: 50px auto; text-align: center;">
+            <h1 style="color: #0070f3;">Mandiri SDB Backend is Live! 🚀</h1>
+            <p>Status: ${process.env.POSTGRES_URL ? '<span style="color: green;">✅ Connected</span>' : '<span style="color: red;">❌ Database Missing</span>'}</p>
+            ${!process.env.POSTGRES_URL ? `
+                <div style="background: #fee; padding: 30px; border: 1px solid #f99; border-radius: 12px; margin-top: 30px;">
+                    <h3 style="color: #c00; margin-top: 0;">⚠️ Database Belum Terhubung</h3>
+                    <p>Waduh Pak, tinggal satu klik lagi nih biar beres!</p>
+                    <p style="margin-bottom: 30px;">Silakan klik link di bawah ini lalu tekan tombol biru <b>"Connect"</b>:</p>
+                    <a href="https://vercel.com/deagamaantariksas-projects/mandiri-sdb-api-backend/storage" target="_blank" style="padding: 15px 30px; background: #0070f3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">HUBUNGKAN DATABASE SEKARANG</a>
+                </div>
+            ` : '<p style="color: #666;">Backend siap melayani request!</p>'}
+        </div>
+    `);
+});
 
 // Logger middleware to see incoming requests
 app.use((req, res, next) => {
