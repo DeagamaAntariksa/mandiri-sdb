@@ -100,7 +100,7 @@ const AdminLayout = ({ theme, toggleTheme }: AdminLayoutProps) => {
                 <div className={`h-full flex flex-col p-8 ${!isSidebarOpen ? 'lg:items-center lg:px-0' : ''}`}>
                     <div className={`flex items-center justify-between mb-12 transition-all ${!isSidebarOpen ? 'lg:justify-center' : ''}`}>
                         <img
-                            src="/mandiri-logo.png"
+                            src="/assets/mandiri-logo.png"
                             alt="Bank Mandiri"
                             className={`h-8 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''} ${!isSidebarOpen ? 'lg:w-8 lg:h-8' : ''}`}
                         />

@@ -111,7 +111,7 @@ const LoginPage = ({ theme, toggleTheme }: LoginPageProps) => {
             {/* ── LEFT PANEL ── */}
             <div className="relative md:flex-1 h-64 md:h-auto overflow-hidden">
                 <img
-                    src="/bg-login.jpg"
+                    src="/assets/bg-login.jpg"
                     alt="Bank Mandiri Safe Deposit Box"
                     className="absolute inset-0 w-full h-full object-cover object-center"
                 />
@@ -120,7 +120,7 @@ const LoginPage = ({ theme, toggleTheme }: LoginPageProps) => {
                 {/* Desktop Version */}
                 <div className="relative hidden md:flex flex-col justify-between h-full p-10 z-10">
                     <div className="flex items-center gap-3">
-                        <img src="/mandiri-logo.png" alt="Bank Mandiri" className={`h-9 w-auto ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
+                        <img src="/assets/mandiri-logo.png" alt="Bank Mandiri" className={`h-9 w-auto ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
                     </div>
 
                     <div className="space-y-3">
@@ -140,7 +140,7 @@ const LoginPage = ({ theme, toggleTheme }: LoginPageProps) => {
                 {/* Mobile Version - More structured */}
                 <div className="relative md:hidden flex flex-col items-center justify-center h-full z-10 p-6 text-center">
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl shadow-2xl">
-                        <img src="/mandiri-logo.png" alt="Bank Mandiri" className={`h-8 w-auto mx-auto mb-4 ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
+                        <img src="/assets/mandiri-logo.png" alt="Bank Mandiri" className={`h-8 w-auto mx-auto mb-4 ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
                         <div className="space-y-1">
                             <h2 className="text-xl font-black text-white leading-tight drop-shadow-sm">Safe Deposit Box</h2>
                             <p className="text-yellow-400 text-sm font-bold uppercase tracking-widest">{t('login.branch_name')}</p>

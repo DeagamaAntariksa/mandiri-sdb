@@ -30,7 +30,7 @@ const Header = () => {
         <header className="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 <Link to="/" className="flex items-center gap-3 group">
-                    <img src="/mandiri-logo.png" alt="Bank Mandiri" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/assets/mandiri-logo.png" alt="Bank Mandiri" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
                     <div className="border-l border-gray-200 dark:border-gray-700 pl-3 hidden sm:block">
                         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight">Safe Deposit Box</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">KC Pondok Indah</p>

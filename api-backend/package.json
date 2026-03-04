@@ -18,6 +18,10 @@
     "mongoose": "^9.2.4",
     "multer": "^2.1.0",
     "multer-storage-cloudinary": "^4.0.0",
+<<<<<<< HEAD
+=======
+    "mysql2": "^3.18.2",
+>>>>>>> 99dccc1 (refactor: organize assets, cleanup legacy scripts, and update backend status reporting)
     "nodemailer": "^8.0.1"
   },
   "devDependencies": {

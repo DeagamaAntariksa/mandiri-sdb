@@ -10,7 +10,7 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 text-center md:text-left">
                     {/* Brand Section */}
                     <div className="space-y-6 flex flex-col items-center md:items-start">
-                        <img src="/mandiri-logo.png" alt="Bank Mandiri" className="h-10 w-auto dark:brightness-0 dark:invert" />
+                        <img src="/assets/mandiri-logo.png" alt="Bank Mandiri" className="h-10 w-auto dark:brightness-0 dark:invert" />
                         <div className="space-y-2">
                             <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Safe Deposit Box</h3>
                             <p className="text-gray-500 dark:text-gray-400 font-medium">{t('footer.branch')}</p>
