@@ -4,7 +4,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import pool from './db.js';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import './db.js';
+import Admin from './models/Admin.js';
+import Application from './models/Application.js';
+import BoxInventory from './models/BoxInventory.js';
 import { sendTrackingCodeEmail, sendPaymentReminderEmail, sendApprovalEmail } from './mailer.js';
 
 dotenv.config();
@@ -15,93 +20,61 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Initialize Database Tables (MySQL)
+// Initialize Database Tables (MongoDB Seeding)
 const initDB = async () => {
     try {
-        // Initialize Box Inventory Table
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS box_inventory (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                box_size VARCHAR(10) UNIQUE,
-                total_slots INT DEFAULT 1700
-            ) ENGINE=InnoDB
-        `);
-
-        // Initialize Applications Table
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS applications (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                tracking_code VARCHAR(20) UNIQUE,
-                full_name VARCHAR(255),
-                nik VARCHAR(20),
-                phone VARCHAR(20),
-                email VARCHAR(255),
-                address TEXT,
-                account_number VARCHAR(50),
-                account_type VARCHAR(50),
-                credit_card_type VARCHAR(50),
-                box_size VARCHAR(10),
-                box_room VARCHAR(10) DEFAULT '1',
-                box_number INT,
-                status VARCHAR(20) DEFAULT 'pending',
-                payment_status VARCHAR(20) DEFAULT 'unpaid',
-                rejection_reason TEXT,
-                ktp_path TEXT,
-                passbook_path TEXT,
-                signature_path TEXT,
-                price DECIMAL(15, 2),
-                start_date DATE,
-                jatuh_temponext DATE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB
-        `);
-
-        // Handle migrations for existing MySQL tables
-        const [columns] = await pool.query('SHOW COLUMNS FROM applications');
-        const columnNames = columns.map(c => c.Field);
-
-        if (!columnNames.includes('box_number')) {
-            await pool.query('ALTER TABLE applications ADD COLUMN box_number INT');
-        }
-        if (!columnNames.includes('box_room')) {
-            await pool.query('ALTER TABLE applications ADD COLUMN box_room VARCHAR(10) DEFAULT "1"');
-        }
-        if (!columnNames.includes('price')) {
-            await pool.query('ALTER TABLE applications ADD COLUMN price DECIMAL(15, 2)');
-        }
-        if (!columnNames.includes('start_date')) {
-            await pool.query('ALTER TABLE applications ADD COLUMN start_date DATE');
-        }
-        if (!columnNames.includes('jatuh_temponext')) {
-            await pool.query('ALTER TABLE applications ADD COLUMN jatuh_temponext DATE');
+        const count = await BoxInventory.countDocuments();
+        if (count === 0) {
+            const sizes = ['30', '40', '50'];
+            for (const size of sizes) {
+                await BoxInventory.create({ box_size: size, total_slots: 1700 });
+            }
+            console.log('Box inventory capacity seeded (Total 5100).');
+        } else {
+            console.log('Box inventory already exists.');
         }
 
-        console.log('Database tables verified and updated (MySQL).');
-
-        // Seed or Update Box Inventory Capacity
-        const sizes = ['30', '40', '50'];
-        for (const size of sizes) {
-            await pool.query(
-                'INSERT INTO box_inventory (box_size, total_slots) VALUES (?, 1700) ON DUPLICATE KEY UPDATE total_slots = 1700',
-                [size]
-            );
+        const adminCount = await Admin.countDocuments();
+        if (adminCount === 0) {
+            await Admin.create({ username: 'admin', password: 'password' });
+            console.log('Default admin created.');
         }
-        console.log('Box inventory capacity updated (Total 5100).');
     } catch (err) {
         console.error('Database Initialization Error:', err);
     }
 };
 initDB();
 
-// Multer storage configuration - Local Disk Storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
+// Configure Cloudinary
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+    console.log('Cloudinary configured for file uploads.');
+}
+
+// Multer storage configuration - Local Disk or Cloudinary
+let storage;
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+    storage = new CloudinaryStorage({
+        cloudinary: cloudinary,
+        params: {
+            folder: 'mandiri_sdb_uploads',
+            allowed_formats: ['jpg', 'png', 'jpeg', 'pdf']
+        }
+    });
+} else {
+    storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            cb(null, Date.now() + '-' + file.originalname);
+        }
+    });
+}
 const upload = multer({ storage });
 
 const app = express();
@@ -135,11 +108,12 @@ app.get('/api/status', (req, res) => {
 // Test DB route
 app.get('/api/test-db', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT 1 + 1 AS solution');
-        res.json({
-            message: 'Database connection successful!',
-            data: rows[0]
-        });
+        const isConnected = mongoose.connection.readyState === 1;
+        if (isConnected) {
+            res.json({ message: 'Database connection successful!', data: { connected: true } });
+        } else {
+            throw new Error('Mongoose not connected');
+        }
     } catch (error) {
         console.error('DB Error:', error);
         res.status(500).json({ error: 'Database connection failed', details: error.message });
@@ -150,16 +124,12 @@ app.get('/api/test-db', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const [rows] = await pool.query(
-            'SELECT * FROM admins WHERE username = ? AND password = ?',
-            [username, password]
-        );
-
-        if (rows.length > 0) {
+        const admin = await Admin.findOne({ username, password });
+        if (admin) {
             res.json({
                 message: 'Login successful',
                 token: 'mock-jwt-token',
-                user: { id: rows[0].id, username: rows[0].username }
+                user: { id: admin._id, username: admin.username }
             });
         } else {
             res.status(401).json({ message: 'Invalid username or password' });
@@ -183,9 +153,15 @@ app.post('/api/applications', upload.fields([
             boxRoom, boxNumber
         } = req.body;
 
-        const ktpPath = req.files['ktpImage'] ? req.files['ktpImage'][0].path.replace(/\\/g, '/') : null;
-        const passbookPath = req.files['passbookImage'] ? req.files['passbookImage'][0].path.replace(/\\/g, '/') : null;
-        const signaturePath = req.files['signatureImage'] ? req.files['signatureImage'][0].path.replace(/\\/g, '/') : null;
+        const getFilePath = (fileField) => {
+            if (!req.files[fileField]) return null;
+            const file = req.files[fileField][0];
+            return process.env.CLOUDINARY_CLOUD_NAME ? file.path : file.path.replace(/\\/g, '/');
+        };
+
+        const ktpPath = getFilePath('ktpImage');
+        const passbookPath = getFilePath('passbookImage');
+        const signaturePath = getFilePath('signatureImage');
 
         if (!ktpPath || !passbookPath) {
             return res.status(400).json({ message: 'KTP and Passbook images are required' });
@@ -195,12 +171,21 @@ app.post('/api/applications', upload.fields([
         const finalBoxNumber = boxNumber || null;
         const trackingCode = 'SDB-' + Math.random().toString(36).substring(2, 9).toUpperCase();
 
-        await pool.query(
-            `INSERT INTO applications 
-            (tracking_code, full_name, nik, phone, email, address, account_number, account_type, credit_card_type, box_size, box_room, box_number, status, ktp_path, passbook_path, signature_path) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [trackingCode, fullName, nik, phone, email, address, accountNumber, accountType, creditCardType, boxSize, finalBoxRoom, finalBoxNumber, 'pending', ktpPath, passbookPath, signaturePath]
-        );
+        await Application.create({
+            tracking_code: trackingCode,
+            full_name: fullName,
+            nik, phone, email, address,
+            account_number: accountNumber,
+            account_type: accountType,
+            credit_card_type: creditCardType,
+            box_size: boxSize,
+            box_room: finalBoxRoom,
+            box_number: finalBoxNumber,
+            status: 'pending',
+            ktp_path: ktpPath,
+            passbook_path: passbookPath,
+            signature_path: signaturePath
+        });
 
         sendTrackingCodeEmail(email, trackingCode, {
             fullName, nik, phone, address, accountNumber, accountType, creditCardType, boxSize
@@ -216,13 +201,25 @@ app.post('/api/applications', upload.fields([
 // Check Status route
 app.get('/api/status/:trackingCode', async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT tracking_code, status, payment_status as paymentStatus, box_size as boxSize, created_at as submittedAt, start_date as startDate, jatuh_temponext as endDate, full_name as fullName, nik, phone, email, address, account_number as accountNumber, rejection_reason as rejectionReason FROM applications WHERE tracking_code = ?',
-            [req.params.trackingCode]
-        );
+        const application = await Application.findOne({ tracking_code: req.params.trackingCode }).lean();
 
-        if (rows.length > 0) {
-            res.json(rows[0]);
+        if (application) {
+            res.json({
+                tracking_code: application.tracking_code,
+                status: application.status,
+                paymentStatus: application.payment_status,
+                boxSize: application.box_size,
+                submittedAt: application.created_at,
+                startDate: application.start_date,
+                endDate: application.jatuh_temponext,
+                fullName: application.full_name,
+                nik: application.nik,
+                phone: application.phone,
+                email: application.email,
+                address: application.address,
+                accountNumber: application.account_number,
+                rejectionReason: application.rejection_reason
+            });
         } else {
             res.status(404).json({ message: 'Application not found' });
         }
@@ -234,11 +231,14 @@ app.get('/api/status/:trackingCode', async (req, res) => {
 // Check Box Availability
 app.get('/api/boxes/availability/:room', async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT box_number, status FROM applications WHERE (box_room = ? OR (box_room IS NULL AND ? = "1")) AND status IN ("pending", "active")',
-            [req.params.room, req.params.room]
-        );
-        res.json(rows);
+        const filter = { status: { $in: ['pending', 'active'] } };
+        if (req.params.room === '1') {
+            filter.$or = [{ box_room: '1' }, { box_room: null }];
+        } else {
+            filter.box_room = req.params.room;
+        }
+        const apps = await Application.find(filter, 'box_number status').lean();
+        res.json(apps);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -248,16 +248,12 @@ app.get('/api/boxes/availability/:room', async (req, res) => {
 
 app.get('/api/admin/dashboard-stats', async (req, res) => {
     try {
-        const [stats] = await pool.query(`
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN payment_status = 'late' THEN 1 ELSE 0 END) as late
-            FROM applications
-        `);
+        const apps = await Application.find().lean();
+        const activeCount = apps.filter(a => a.status === 'active').length;
+        const pendingCount = apps.filter(a => a.status === 'pending').length;
+        const lateCount = apps.filter(a => a.payment_status === 'late').length;
 
-        const [inventory] = await pool.query('SELECT box_size, total_slots FROM box_inventory');
+        const inventory = await BoxInventory.find().lean();
         const metricsBySize = {};
         let totalCapacity = 0;
 
@@ -266,19 +262,18 @@ app.get('/api/admin/dashboard-stats', async (req, res) => {
             totalCapacity += inv.total_slots;
         });
 
-        const [sizeStats] = await pool.query('SELECT box_size, COUNT(*) as active_count FROM applications WHERE status = "active" GROUP BY box_size');
-        sizeStats.forEach(s => {
+        apps.filter(a => a.status === 'active').forEach(s => {
             if (metricsBySize[s.box_size]) {
-                metricsBySize[s.box_size].active = parseInt(s.active_count);
-                metricsBySize[s.box_size].available = metricsBySize[s.box_size].total - parseInt(s.active_count);
+                metricsBySize[s.box_size].active += 1;
+                metricsBySize[s.box_size].available -= 1;
             }
         });
 
         res.json({
             totalBoxes: totalCapacity,
-            available: totalCapacity - (parseInt(stats[0].active) || 0),
-            active: parseInt(stats[0].active) || 0,
-            latePayments: parseInt(stats[0].late) || 0,
+            available: totalCapacity - activeCount,
+            active: activeCount,
+            latePayments: lateCount,
             metricsBySize
         });
     } catch (error) {
@@ -288,12 +283,12 @@ app.get('/api/admin/dashboard-stats', async (req, res) => {
 
 app.get('/api/admin/inventory', async (req, res) => {
     try {
-        const [inventory] = await pool.query('SELECT box_size as size, total_slots as total FROM box_inventory');
-        const [activeStats] = await pool.query('SELECT box_size, COUNT(*) as active FROM applications WHERE status = "active" GROUP BY box_size');
+        const inventory = await BoxInventory.find().lean();
+        const activeApps = await Application.find({ status: 'active' }).lean();
 
         const result = inventory.map(r => {
-            const active = activeStats.find(a => a.box_size === r.size)?.active || 0;
-            return { ...r, active: parseInt(active), available: r.total - parseInt(active) };
+            const activeCount = activeApps.filter(a => a.box_size === r.box_size).length;
+            return { size: r.box_size, total: r.total_slots, active: activeCount, available: r.total_slots - activeCount };
         });
         res.json(result);
     } catch (error) {
@@ -304,8 +299,24 @@ app.get('/api/admin/inventory', async (req, res) => {
 app.get('/api/admin/applications', async (req, res) => {
     try {
         await runAutoExpiry();
-        const [rows] = await pool.query('SELECT id, tracking_code, full_name as name, email, nik, phone, box_size as size, box_number, account_number, price, status, payment_status as paymentStatus, created_at as createdAt, jatuh_temponext as paymentDueDate FROM applications ORDER BY created_at DESC');
-        res.json(rows);
+        const apps = await Application.find().sort({ created_at: -1 }).lean();
+        const ObjectIdsToStrings = apps.map(app => ({
+            id: app._id.toString(),
+            tracking_code: app.tracking_code,
+            name: app.full_name,
+            email: app.email,
+            nik: app.nik,
+            phone: app.phone,
+            size: app.box_size,
+            box_number: app.box_number,
+            account_number: app.account_number,
+            price: app.price,
+            status: app.status,
+            paymentStatus: app.payment_status,
+            createdAt: app.created_at,
+            paymentDueDate: app.jatuh_temponext
+        }));
+        res.json(ObjectIdsToStrings);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -313,13 +324,13 @@ app.get('/api/admin/applications', async (req, res) => {
 
 app.get('/api/admin/applications/:id', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM applications WHERE id = ?', [req.params.id]);
-        if (rows.length > 0) {
-            const appData = rows[0];
+        const appData = await Application.findById(req.params.id).lean();
+        if (appData) {
             const fmt = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
             const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:5001`;
             res.json({
                 ...appData,
+                id: appData._id.toString(),
                 name: appData.full_name,
                 paymentStatus: appData.payment_status,
                 size: appData.box_size,
@@ -341,10 +352,9 @@ app.get('/api/admin/applications/:id', async (req, res) => {
 
 app.post('/api/admin/applications/:id/send-reminder', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT full_name, email, tracking_code, box_size, jatuh_temponext FROM applications WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.status(404).json({ message: 'Not found' });
+        const appl = await Application.findById(req.params.id).lean();
+        if (!appl) return res.status(404).json({ message: 'Not found' });
 
-        const appl = rows[0];
         const dueDate = appl.jatuh_temponext ? new Date(appl.jatuh_temponext).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
         await sendPaymentReminderEmail(appl.email, appl.full_name, appl.tracking_code, appl.box_size, dueDate);
         res.json({ success: true });
@@ -356,31 +366,28 @@ app.post('/api/admin/applications/:id/send-reminder', async (req, res) => {
 app.patch('/api/admin/applications/:id', async (req, res) => {
     const { status, price, start_date, end_date, rejection_reason, payment_status } = req.body;
     try {
-        const fields = [];
-        const params = [];
-        if (status) { fields.push('status = ?'); params.push(status); }
-        if (price) { fields.push('price = ?'); params.push(price); }
-        if (start_date) { fields.push('start_date = ?'); params.push(start_date); }
-        if (end_date) { fields.push('jatuh_temponext = ?'); params.push(end_date); }
-        if (rejection_reason) { fields.push('rejection_reason = ?'); params.push(rejection_reason); }
-        if (payment_status) { fields.push('payment_status = ?'); params.push(payment_status); }
+        const updateData = {};
+        if (status) updateData.status = status;
+        if (price) updateData.price = price;
+        if (start_date) updateData.start_date = new Date(start_date);
+        if (end_date) updateData.jatuh_temponext = new Date(end_date);
+        if (rejection_reason) updateData.rejection_reason = rejection_reason;
+        if (payment_status) updateData.payment_status = payment_status;
 
         if (payment_status === 'paid') {
-            const [current] = await pool.query('SELECT jatuh_temponext FROM applications WHERE id = ?', [req.params.id]);
-            const baseDate = current[0]?.jatuh_temponext ? new Date(current[0].jatuh_temponext) : new Date();
+            const current = await Application.findById(req.params.id);
+            const baseDate = current?.jatuh_temponext ? new Date(current.jatuh_temponext) : new Date();
             const newEndDate = req.body.new_end_date ? new Date(req.body.new_end_date) : new Date(baseDate.setFullYear(baseDate.getFullYear() + 1));
-            fields.push('status = ?', 'jatuh_temponext = ?');
-            params.push('active', newEndDate.toISOString().split('T')[0]);
+            updateData.status = 'active';
+            updateData.jatuh_temponext = newEndDate;
         }
 
-        if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+        if (Object.keys(updateData).length === 0) return res.status(400).json({ message: 'No fields to update' });
 
-        params.push(req.params.id);
-        await pool.query(`UPDATE applications SET ${fields.join(', ')} WHERE id = ?`, params);
+        await Application.findByIdAndUpdate(req.params.id, updateData);
 
-        if (status === 'active') {
-            const [applRows] = await pool.query('SELECT * FROM applications WHERE id = ?', [req.params.id]);
-            const appl = applRows[0];
+        if (status === 'active' || updateData.status === 'active') {
+            const appl = await Application.findById(req.params.id).lean();
             const fmt = d => d ? new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
             sendApprovalEmail(appl.email, appl.full_name, appl.tracking_code, appl.box_size, fmt(appl.start_date), fmt(appl.jatuh_temponext))
                 .catch(e => console.error('Approval email failed:', e.message));
@@ -394,8 +401,12 @@ app.patch('/api/admin/applications/:id', async (req, res) => {
 
 async function runAutoExpiry() {
     try {
-        const today = new Date().toISOString().split('T')[0];
-        await pool.query('UPDATE applications SET status = "expired", payment_status = "late" WHERE status = "active" AND jatuh_temponext < ?', [today]);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        await Application.updateMany(
+            { status: 'active', jatuh_temponext: { $lt: today } },
+            { $set: { status: 'expired', payment_status: 'late' } }
+        );
     } catch (err) {
         console.error('Auto-expiry error:', err.message);
     }
